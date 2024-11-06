@@ -16,3 +16,19 @@ final class Item {
         self.timestamp = timestamp
     }
 }
+
+
+@Model
+final class ShopThing {
+    
+    var name : String
+    var amount : Int
+    var bought : Bool
+
+    
+    init(name: String, amount : Int, bought : Bool) {
+        self.name = name
+        self.amount = amount
+        self.bought = bought
+    }
+}

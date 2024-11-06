@@ -10,29 +10,50 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query private var allshopping: [ShopThing]
 
+    
+    @State var addName = ""
+    @State var addAmount = ""
+
+    
+    
     var body: some View {
         NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+            VStack {
+                TextField("Name", text: $addName)
+                TextField("Amount", text: $addAmount)
+                Button(action: addItem) {
+                    Text("Add")
                 }
-                .onDelete(perform: deleteItems)
+                
+                List {
+                    ForEach(allshopping) { item in
+                        NavigationLink {
+                            VStack {
+                                Text("Item at \(item.name)")
+                                Button(item.bought ? "X" : "O") {
+                                    item.bought.toggle()
+                                }
+
+                            }
+                        } label: {
+                            HStack {
+                                Text("Köp \(item.amount) st \(item.name)")
+                                
+                                Text(item.bought ? "BOUGHT" : "NOT BOUGHT")
+                                
+                            }
+                        }
+                    }
+                    .onDelete(perform: deleteItems)
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+                
             }
         } detail: {
             Text("Select an item")
@@ -41,21 +62,31 @@ struct ContentView: View {
 
     private func addItem() {
         withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+            //let newItem = Item(timestamp: Date())
+            //modelContext.insert(newItem)
+            
+            let amount = Int(addAmount)
+            if(amount == nil) {
+                return
+            }
+            
+            let newShoppingItem = ShopThing(name: addName, amount: amount!, bought: false)
+            modelContext.insert(newShoppingItem)
         }
     }
 
     private func deleteItems(offsets: IndexSet) {
+        
         withAnimation {
             for index in offsets {
-                modelContext.delete(items[index])
+                modelContext.delete(allshopping[index])
             }
         }
+        
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: ShopThing.self, inMemory: true)
 }
